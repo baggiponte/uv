@@ -622,7 +622,7 @@ impl ValidatedLock {
         }
 
         // If the set of supported environments has changed, we have to perform a clean resolution.
-        if lock.supported_environments()
+        if lock.simplified_supported_environments()
             != environments
                 .map(SupportedEnvironments::as_markers)
                 .unwrap_or_default()

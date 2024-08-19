@@ -1,4 +1,5 @@
 use pep440_rs::{Version, VersionSpecifiers};
+use pep508_rs::MarkerTree;
 use uv_python::{Interpreter, PythonVersion};
 
 use crate::{RequiresPython, RequiresPythonBound};
@@ -6,13 +7,13 @@ use crate::{RequiresPython, RequiresPythonBound};
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PythonRequirement {
     /// The installed version of Python.
-    installed: Version,
+    pub(crate) installed: Version,
     /// The target version of Python; that is, the version of Python for which we are resolving
     /// dependencies. This is typically the same as the installed version, but may be different
     /// when specifying an alternate Python version for the resolution.
     ///
     /// If `None`, the target version is the same as the installed version.
-    target: Option<PythonTarget>,
+    pub(crate) target: Option<PythonTarget>,
 }
 
 impl PythonRequirement {
@@ -68,6 +69,30 @@ impl PythonRequirement {
     /// Return the target version of Python.
     pub fn target(&self) -> Option<&PythonTarget> {
         self.target.as_ref()
+    }
+
+    /// A wrapper around `RequiresPython::simplify_markers`. See its docs for
+    /// more info.
+    ///
+    /// When this `PythonRequirement` isn't `RequiresPython`, the given markers
+    /// are returned unchanged.
+    pub(crate) fn simplify_markers(&self, marker: MarkerTree) -> MarkerTree {
+        if let Some(PythonTarget::RequiresPython(requires_python)) = self.target.as_ref() {
+            requires_python.simplify_markers(marker)
+        } else {
+            marker
+        }
+    }
+
+    /// Return a [`MarkerTree`] representing the Python requirement.
+    ///
+    /// See: [`RequiresPython::to_marker_tree`]
+    pub fn to_marker_tree(&self) -> Option<MarkerTree> {
+        if let Some(PythonTarget::RequiresPython(requires_python)) = self.target.as_ref() {
+            Some(requires_python.to_marker_tree())
+        } else {
+            None
+        }
     }
 }
 

@@ -10,7 +10,10 @@ use pep508_rs::{split_scheme, MarkerTree, Scheme};
 use pypi_types::HashDigest;
 use uv_normalize::{ExtraName, PackageName};
 
-use crate::resolution::AnnotatedDist;
+use crate::{
+    requires_python::{RequiresPython, SimplifiedMarkerTree},
+    resolution::AnnotatedDist,
+};
 
 #[derive(Debug, Clone)]
 /// A pinned package with its resolved distribution and all the extras that were pinned for it.
@@ -31,6 +34,7 @@ impl RequirementsTxtDist {
     /// supported in `requirements.txt`).
     pub(crate) fn to_requirements_txt(
         &self,
+        requires_python: Option<&RequiresPython>,
         include_extras: bool,
         include_markers: bool,
     ) -> Cow<str> {
@@ -93,7 +97,8 @@ impl RequirementsTxtDist {
                         .markers
                         .as_ref()
                         .filter(|_| include_markers)
-                        .and_then(MarkerTree::contents)
+                        .map(|markers| SimplifiedMarkerTree::new(requires_python, markers.clone()))
+                        .and_then(|simplified_markers| simplified_markers.try_to_string())
                     {
                         Cow::Owned(format!("{given} ; {markers}"))
                     } else {
@@ -108,7 +113,8 @@ impl RequirementsTxtDist {
                 .markers
                 .as_ref()
                 .filter(|_| include_markers)
-                .and_then(MarkerTree::contents)
+                .map(|markers| SimplifiedMarkerTree::new(requires_python, markers.clone()))
+                .and_then(|simplified_markers| simplified_markers.try_to_string())
             {
                 Cow::Owned(format!("{} ; {}", self.dist.verbatim(), markers))
             } else {
@@ -122,7 +128,8 @@ impl RequirementsTxtDist {
                 .markers
                 .as_ref()
                 .filter(|_| include_markers)
-                .and_then(MarkerTree::contents)
+                .map(|markers| SimplifiedMarkerTree::new(requires_python, markers.clone()))
+                .and_then(|simplified_markers| simplified_markers.try_to_string())
             {
                 Cow::Owned(format!(
                     "{}[{}]{} ; {}",
