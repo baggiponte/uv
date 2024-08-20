@@ -6,7 +6,7 @@ version = 1
 requires-python = "==3.11.*"
 resolution-markers = [
     "python_full_version < '3.12'",
-    "python_full_version < '3.13'",
+    "python_full_version == '3.12.*'",
     "python_full_version >= '3.13' and python_full_version < '4'",
     "python_full_version >= '4'",
 ]
@@ -877,7 +877,7 @@ dependencies = [
     { name = "envier" },
     { name = "opentelemetry-api" },
     { name = "protobuf" },
-    { name = "setuptools" },
+    { name = "setuptools", marker = "python_full_version >= '3.12'" },
     { name = "six" },
     { name = "sqlparse" },
     { name = "typing-extensions" },
