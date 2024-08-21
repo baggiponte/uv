@@ -104,7 +104,10 @@ Ok(
                             ),
                         },
                         extra: {},
-                        marker: true,
+                        simplified_marker: SimplifiedMarkerTree(
+                            true,
+                        ),
+                        complexified_marker: true,
                     },
                 ],
                 optional_dependencies: {},
