@@ -394,7 +394,6 @@ impl<InstalledPackages: InstalledPackagesProvider> ResolverState<InstalledPackag
                         );
                     }
 
-                    Self::trace_resolution(&resolution);
                     resolutions.push(resolution);
                     continue 'FORK;
                 };
@@ -591,6 +590,7 @@ impl<InstalledPackages: InstalledPackagesProvider> ResolverState<InstalledPackag
                     resolution.nodes.len()
                 );
             }
+            Self::trace_resolution(resolution);
         }
         ResolutionGraph::from_state(
             &resolutions,
@@ -607,7 +607,7 @@ impl<InstalledPackages: InstalledPackagesProvider> ResolverState<InstalledPackag
     }
 
     /// When trace level logging is enabled, we dump the final
-    /// unioned resolution, including markers, to help with
+    /// set of resolutions, including markers, to help with
     /// debugging. Namely, this tells use precisely the state
     /// emitted by the resolver before going off to construct a
     /// resolution graph.
@@ -615,9 +615,14 @@ impl<InstalledPackages: InstalledPackagesProvider> ResolverState<InstalledPackag
         if !tracing::enabled!(Level::TRACE) {
             return;
         }
+        if let Some(markers) = combined.markers.fork_markers() {
+            trace!("Resolution: {:?}", markers);
+        } else {
+            trace!("Resolution: <matches all marker environments>");
+        }
         for edge in &combined.edges {
             trace!(
-                "Resolution: {} -> {}",
+                "Resolution edge: {} -> {}",
                 edge.from
                     .as_ref()
                     .map(PackageName::as_str)
@@ -647,7 +652,7 @@ impl<InstalledPackages: InstalledPackagesProvider> ResolverState<InstalledPackag
             if let Some(marker) = edge.marker.contents() {
                 write!(msg, " ; {marker}").unwrap();
             }
-            trace!("Resolution:     {msg}");
+            trace!("Resolution edge:     {msg}");
         }
     }
 
