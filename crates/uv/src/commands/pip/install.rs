@@ -9,7 +9,7 @@ use tracing::{debug, enabled, Level};
 use distribution_types::{IndexLocations, Resolution, UnresolvedRequirementSpecification};
 use install_wheel_rs::linker::LinkMode;
 use pypi_types::Requirement;
-use uv_auth::store_credentials_from_url;
+use uv_auth::{store_credentials_from_environment, store_credentials_from_url};
 use uv_cache::Cache;
 use uv_client::{BaseClientBuilder, Connectivity, FlatIndexClient, RegistryClientBuilder};
 use uv_configuration::{
@@ -267,6 +267,7 @@ pub(crate) async fn pip_install(
     for url in index_locations.urls() {
         store_credentials_from_url(url);
     }
+    store_credentials_from_environment();
 
     // Initialize the registry client.
     let client = RegistryClientBuilder::from(client_builder)
