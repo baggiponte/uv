@@ -1,6 +1,6 @@
 use std::sync::{Arc, LazyLock};
 
-use tracing::{debug, trace};
+use tracing::{debug, trace, warn};
 use url::Url;
 
 use cache::CredentialsCache;
