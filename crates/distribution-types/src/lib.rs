@@ -236,10 +236,6 @@ pub struct PathBuiltDist {
     pub filename: WheelFilename,
     /// The absolute, canonicalized path to the wheel which we use for installing.
     pub install_path: PathBuf,
-    /// The absolute path or path relative to the workspace root pointing to the wheel
-    /// which we use for locking. Unlike `given` on the verbatim URL all environment variables
-    /// are resolved, and unlike the install path, we did not yet join it on the base directory.
-    pub lock_path: PathBuf,
     /// The URL as it was provided by the user.
     pub url: VerbatimUrl,
 }
@@ -297,10 +293,6 @@ pub struct PathSourceDist {
     pub name: PackageName,
     /// The absolute, canonicalized path to the distribution which we use for installing.
     pub install_path: PathBuf,
-    /// The absolute path or path relative to the workspace root pointing to the distribution
-    /// which we use for locking. Unlike `given` on the verbatim URL all environment variables
-    /// are resolved, and unlike the install path, we did not yet join it on the base directory.
-    pub lock_path: PathBuf,
     /// The file extension, e.g. `tar.gz`, `zip`, etc.
     pub ext: SourceDistExtension,
     /// The URL as it was provided by the user.
@@ -313,10 +305,6 @@ pub struct DirectorySourceDist {
     pub name: PackageName,
     /// The absolute, canonicalized path to the distribution which we use for installing.
     pub install_path: PathBuf,
-    /// The absolute path or path relative to the workspace root pointing to the distribution
-    /// which we use for locking. Unlike `given` on the verbatim URL all environment variables
-    /// are resolved, and unlike the install path, we did not yet join it on the base directory.
-    pub lock_path: PathBuf,
     /// Whether the package should be installed in editable mode.
     pub editable: bool,
     /// The URL as it was provided by the user.
@@ -368,7 +356,6 @@ impl Dist {
         name: PackageName,
         url: VerbatimUrl,
         install_path: &Path,
-        lock_path: &Path,
         ext: DistExtension,
     ) -> Result<Dist, Error> {
         // Store the canonicalized path, which also serves to validate that it exists.
@@ -395,14 +382,12 @@ impl Dist {
                 Ok(Self::Built(BuiltDist::Path(PathBuiltDist {
                     filename,
                     install_path,
-                    lock_path: lock_path.to_path_buf(),
                     url,
                 })))
             }
             DistExtension::Source(ext) => Ok(Self::Source(SourceDist::Path(PathSourceDist {
                 name,
                 install_path,
-                lock_path: lock_path.to_path_buf(),
                 ext,
                 url,
             }))),
@@ -414,7 +399,6 @@ impl Dist {
         name: PackageName,
         url: VerbatimUrl,
         install_path: &Path,
-        lock_path: &Path,
         editable: bool,
     ) -> Result<Dist, Error> {
         // Store the canonicalized path, which also serves to validate that it exists.
@@ -430,7 +414,6 @@ impl Dist {
         Ok(Self::Source(SourceDist::Directory(DirectorySourceDist {
             name,
             install_path,
-            lock_path: lock_path.to_path_buf(),
             editable,
             url,
         })))
@@ -461,18 +444,13 @@ impl Dist {
                 archive.subdirectory,
                 archive.ext,
             ),
-            ParsedUrl::Path(file) => Self::from_file_url(
-                name,
-                url.verbatim,
-                &file.install_path,
-                &file.lock_path,
-                file.ext,
-            ),
+            ParsedUrl::Path(file) => {
+                Self::from_file_url(name, url.verbatim, &file.install_path, file.ext)
+            }
             ParsedUrl::Directory(directory) => Self::from_directory_url(
                 name,
                 url.verbatim,
                 &directory.install_path,
-                &directory.lock_path,
                 directory.editable,
             ),
             ParsedUrl::Git(git) => {

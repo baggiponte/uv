@@ -266,7 +266,6 @@ impl<'a> Planner<'a> {
                     url,
                     editable,
                     install_path,
-                    lock_path,
                 } => {
                     // Store the canonicalized path, which also serves to validate that it exists.
                     let install_path = match install_path.canonicalize() {
@@ -281,7 +280,6 @@ impl<'a> Planner<'a> {
                         name: requirement.name.clone(),
                         url: url.clone(),
                         install_path,
-                        lock_path: lock_path.clone(),
                         editable: *editable,
                     };
 
@@ -303,7 +301,6 @@ impl<'a> Planner<'a> {
                     ext,
                     url,
                     install_path,
-                    lock_path,
                 } => {
                     // Store the canonicalized path, which also serves to validate that it exists.
                     let install_path = match install_path.canonicalize() {
@@ -331,21 +328,20 @@ impl<'a> Planner<'a> {
                                 filename,
                                 url: url.clone(),
                                 install_path,
-                                lock_path: lock_path.clone(),
                             };
 
                             if !wheel.filename.is_compatible(tags) {
                                 bail!(
-                                "A path dependency is incompatible with the current platform: {}",
-                                wheel.lock_path.user_display()
-                            );
+                                    "A path dependency is incompatible with the current platform: {}",
+                                    wheel.install_path.user_display()
+                                );
                             }
 
                             if no_binary {
                                 bail!(
-                                "A path dependency points to a wheel which conflicts with `--no-binary`: {}",
-                                wheel.url
-                            );
+                                    "A path dependency points to a wheel which conflicts with `--no-binary`: {}",
+                                    wheel.url
+                                );
                             }
 
                             // Find the exact wheel from the cache, since we know the filename in
@@ -383,7 +379,6 @@ impl<'a> Planner<'a> {
                                 name: requirement.name.clone(),
                                 url: url.clone(),
                                 install_path,
-                                lock_path: lock_path.clone(),
                                 ext: *ext,
                             };
 
