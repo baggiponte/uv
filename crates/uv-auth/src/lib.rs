@@ -72,7 +72,7 @@ pub fn store_credentials_from_environment() -> bool {
             debug!("Added credentials for `{url}`");
             populated = true;
         } else {
-            debug!("Ignoring URL without credentials in `UV_AUTH_URLS`: {url}");
+            warn!("Ignoring URL without credentials in `UV_AUTH_URLS`: {url}");
         }
     }
 
