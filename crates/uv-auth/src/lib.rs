@@ -50,7 +50,7 @@ pub fn store_credentials_from_url(url: &Url) -> bool {
 /// Only `https` URLs are supported, URLs with other schemes are ignored.
 ///
 /// Populates the URL prefix cache in the global [`CredentialsCache`]. The credentials are not
-/// added the the realm-level cache to ensure that a URL with a path is not used unless a request
+/// added to the realm-level cache to ensure that a URL with a path is not used unless a request
 /// is made to a child of the provided URL.
 pub fn store_credentials_from_environment() -> bool {
     let Some(urls) = std::env::var_os("UV_AUTH_URLS") else {
