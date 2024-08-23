@@ -84,7 +84,7 @@ fn parse_url_from_env(url: &str) -> Option<Url> {
     if url.starts_with("https://") {
         Url::parse(url)
     } else if url.starts_with("http://") {
-        debug!("Ignoring insecure URL in `UV_AUTH_URLS`: {url}");
+        warn!("Ignoring insecure URL in `UV_AUTH_URLS`: {url}");
         return None;
     } else {
         let url = format!("https://{url}");
